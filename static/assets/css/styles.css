@@ -1,0 +1,37 @@
+.card-body {
+    position: relative;
+    overflow-y: auto; /* Adiciona uma barra de rolagem quando o conteúdo ultrapassa a altura */
+    display: flex;
+    flex-direction: column; /* Inverte a ordem dos filhos para que o último fique no topo */
+    height: 30vh; 
+    background-color:#343541; 
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+.chat-container {
+    margin-bottom: 10px; /* Adiciona espaço entre os chat-containers */
+    width: 95%;
+    display: flex;
+    border-radius: 15px;
+}
+
+.chat-container.right {
+    margin-left: auto; /* Alinha à direita, ajuste para margin-left: auto se quiser todos à esquerda */
+    background-color: #DCF8C6; /* Adapte a cor de fundo para a direita conforme necessário */
+}
+
+.chat-container.left {
+    margin-right: auto; /* Alinha à direita, ajuste para margin-left: auto se quiser todos à esquerda */
+    background-color: #77d1f7;
+}
+
+.chat-container .content {
+    width: 100%;
+    padding: 5px;
+}
+
+#audio-player {
+    width: 100%; /* Garante que o elemento de áudio ocupa 100% da largura do chat-container */
+}
+

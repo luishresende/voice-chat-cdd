@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="pt-br" data-bss-forced-theme="light">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Chat com Gravador de Áudio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/bootstrap/css/bootstrap.min.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abril+Fatface&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa+Slab+One&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bebas+Neue&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cantarell&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/fonts/fontawesome-all.min.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/styles.min.css') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='assets/img/logo.png') }}" type="img/png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='assets/css/styles.css') }}">
+</head>
+
+<body style="height: 100%;">
+    <section style="height: 100vh;background: #343541;">
+        <div class="container py-5 h-100" style="padding: 0px 15px !important;height: 96% !important;">
+            <div class="row" style="height: 10% !important;">
+                <div class="col" style="width: 900px;margin: 10px;">
+                    <h1
+                        style="color: var(--bs-body-bg);background: #343541;height: 100%;box-shadow: 2px 3px 13px rgba(255,255,255,0.36);margin: 0px;padding: 10px 10px;border-radius: 10px;border-top-left-radius: 10;border-color: rgb(255,255,255);font-size: 4vh;text-align: center;width: initial;font-family: Cantarell, sans-serif;font-weight: bold;">
+                        Chat de Voz</h1>
+                </div>
+            </div>
+            <div class="row" style="height: 10% !important;margin-top: 10px;">
+                <div class="col" style="width: 900px;margin: 10px;">
+                    <h1
+                        style="color: var(--bs-body-bg);background: #343541;height: 100%;box-shadow: 2px 3px 13px rgba(255,255,255,0.36);margin: 0px;padding: 10px 10px;border-radius: 10px;border-top-left-radius: 10;border-color: rgb(255,255,255);font-size: 3vh;text-align: left;width: initial;font-family: Cantarell, sans-serif;font-weight: bold;">
+                        Equipe -&nbsp;<span style="font-size: 2.5vh;color: var(--bs-emphasis-color);"></span></h1>
+                </div>
+            </div>
+            <div class="row d-flex justify-content-center h-100"
+                style="height: 70% !important;margin: 29px 15px;box-shadow: 3px 2px 16px rgba(187,187,187,0.51);background: linear-gradient(rgba(0,0,0,0.06) 0%, rgba(255,255,255,0.1) 100%);border-radius: 10px;">
+                <div class="col-md-11 col-lg-11 col-xl-11"
+                    style="background: #000000;border-radius: 50px;border-top-left-radius: 10px;border-top-right-radius: 10px;border-bottom-right-radius: 10px;border-bottom-left-radius: 10px;color: rgb(0,0,0);padding: 0px;margin: 10px;box-shadow: 0px 0px 6px rgba(0,0,0,0.42);width: 95%;">
+                    <div class="card border-0 h-100" id="chat2"
+                        style="border-radius: 50px;color: rgb(0,0,0);background: #000000;margin: 0;">
+                        <div class="card-body" data-mdb-perfect-scrollbar="true" id="message-list"
+                            style="background: #565869;border-top-left-radius: 10px;border-top-right-radius: 10px;box-shadow: 0px 0px rgb(0, 0, 0);">
+                        </div>
+                        <div class="card-footer text-muted d-flex justify-content-between align-items-center p-3"
+                            style="border-bottom-left-radius: 10px;border-bottom-right-radius: 10px;background: #8e8ea0;">
+                            <canvas id="waveform" style="flex-grow:1;width:80%;height:50px;margin:0 20px;"></canvas>
+                            <div class="d-flex align-items-center"><a id="record-button" href="#"
+                                    style="margin-right:20px;"><i class="fas fa-microphone"
+                                        style="font-size:29px;background:#00000000;color:var(--bs-form-invalid-color);"></i></a><a
+                                    id="send-button" href="#!" style="margin-right:20px;"><i class="fas fa-paper-plane"
+                                        id="enviar" style="font-size:22px;"></i></a></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+    <script>
+
+        // Your existing script for audio recording goes here
+        document.addEventListener('DOMContentLoaded', () => {
+            const messageList = document.getElementById('message-list');
+            const recordButton = document.getElementById('record-button');
+            const audioPlayer = document.getElementById('audio-player');
+            const sendButton = document.getElementById('send-button');
+            let isRecording = false;
+            let amostras;
+            let mediaRecorder;
+            let audioChunks = [];
+            let analyser;
+            let dataArray;
+            let scriptProcessor;
+            let canvasContext;
+            let width;
+            let height;
+
+            const socket = io();
+            let audioContext; // Declarar o contexto de áudio
+            const username = '{{ username }}';
+            const seed = '{{ password }}';
+            const ip = '{{ ip }}'
+
+            function encrypt(wave, seed) {
+                Math.seedrandom(seed);
+
+                for (let i = 0; i < wave.length; i++) {
+                    const randomNumber = Math.random() + 0.001;
+                    const operation = Math.floor(Math.random() * 3);
+
+                    switch (operation) {
+                        case 0:
+                            wave[i] = wave[i] * randomNumber;
+                            break;
+                        case 1:
+                            wave[i] = wave[i] + randomNumber;
+                            break;
+                        case 2:
+                            wave[i] = wave[i] - randomNumber;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                return wave;
+            }
+
+            function decrypt(wave, seed) {
+                Math.seedrandom(seed);
+
+                for (let i = 0; i < wave.length; i++) {
+                    const randomNumber = Math.random() + 0.001;;
+                    const operation = Math.floor(Math.random() * 3); // 0, 1, or 2
+
+                    switch (operation) {
+                        case 0:
+                            wave[i] = wave[i] / randomNumber;
+                            break;
+                        case 1:
+                            wave[i] = wave[i] - randomNumber;
+                            break;
+                        case 2:
+                            wave[i] = wave[i] + randomNumber;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+
+                return wave;
+            }
+
+
+            // Função para criar o contexto de áudio
+            function createAudioContext() {
+                audioContext = new (window.AudioContext || window.webkitAudioContext);
+
+            }
+
+            recordButton.addEventListener('click', toggleRecording);
+            sendButton.addEventListener('click', emitMessage);
+
+            function emitMessage() {
+                if (amostras.length > 1000) {
+                    let encryptedAudio = encrypt(amostras, seed);
+                    let content = {
+                        senderName: username,
+                        audioContent: encryptedAudio
+                    };
+                    socket.emit('clientMessage', content);
+                }
+                resetContent();
+            }
+
+            function resetContent() {
+                amostras = [];
+
+                if (audioPlayer) {
+                    audioPlayer.src = '';
+                }
+
+                const canvas = document.getElementById('waveform');
+                const canvasContext = canvas.getContext('2d');
+                canvasContext.clearRect(0, 0, canvas.width, canvas.height);
+            }
+
+            function toggleRecording() {
+                if (mediaRecorder && mediaRecorder.state === 'recording') {
+                    stopRecording();
+                } else {
+                    startRecording();
+                }
+            }
+
+            function startRecording() {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then((stream) => {
+                        if (!audioContext) {
+                            createAudioContext();
+                        }
+
+                        const input = audioContext.createMediaStreamSource(stream);
+
+                        analyser = audioContext.createAnalyser();
+                        analyser.fftSize = 2048;
+
+                        scriptProcessor = audioContext.createScriptProcessor(4096, 1, 1);
+                        scriptProcessor.connect(audioContext.destination);
+
+                        canvasContext = document.getElementById('waveform').getContext('2d');
+                        width = canvasContext.canvas.width;
+                        height = canvasContext.canvas.height;
+
+                        analyser.connect(scriptProcessor);
+                        scriptProcessor.connect(audioContext.destination);
+
+                        scriptProcessor.onaudioprocess = () => {
+                            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+                            analyser.getByteTimeDomainData(dataArray);
+
+                            canvasContext.clearRect(0, 0, width, height);
+                            canvasContext.lineWidth = 2;
+                            canvasContext.strokeStyle = '#f7021f';
+                            canvasContext.beginPath();
+
+                            const sliceWidth = width * 1.0 / dataArray.length;
+                            let x = 0;
+
+                            for (let i = 0; i < dataArray.length; i++) {
+                                const v = dataArray[i] / 128.0;
+                                const y = v * height / 2;
+
+                                if (i === 0) {
+                                    canvasContext.moveTo(x, y);
+                                } else {
+                                    canvasContext.lineTo(x, y);
+                                }
+
+                                x += sliceWidth;
+                            }
+
+                            canvasContext.stroke();
+                        };
+
+                        input.connect(analyser);
+
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.ondataavailable = (e) => {
+                            if (e.data.size > 0) {
+                                audioChunks.push(e.data);
+                            }
+                        };
+
+                        // Criação do contexto de áudio
+                        const context = new (window.AudioContext || window.webkitAudioContext)();
+
+                        mediaRecorder.onstop = async () => {
+                            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+
+                            // Função para obter os pontos da onda a partir do arquivo WAV
+                            const getamostras = async (blob) => {
+                                return new Promise((resolve, reject) => {
+                                    const reader = new FileReader();
+                                    reader.onload = async (event) => {
+                                        const arrayBuffer = event.target.result;
+                                        const audioBuffer = await context.decodeAudioData(arrayBuffer);
+                                        const channelData = audioBuffer.getChannelData(0); // Canal esquerdo
+                                        resolve(channelData);
+                                    };
+                                    reader.onerror = (event) => {
+                                        reject(event);
+                                    };
+                                    reader.readAsArrayBuffer(blob);
+                                });
+                            };
+
+                            // Chama a função para obter os pontos da onda
+                            amostras = await getamostras(audioBlob);
+                        };
+
+                        mediaRecorder.start();
+                    })
+                    .catch((err) => {
+                        console.error('Erro ao acessar o microfone:', err);
+                    });
+            }
+
+            function stopRecording() {
+                if (mediaRecorder) {
+                    mediaRecorder.stop();
+                    scriptProcessor.disconnect();
+                    analyser.disconnect();
+
+                    audioChunks = [];
+                    analyser = null;
+                    dataArray = null;
+                    scriptProcessor = null;
+                }
+            }
+
+            const getWav = async (audioContent) => {
+                const url = 'https://34.95.238.42/api/download-wav';
+
+                const arrayToSerialize = Array.from(audioContent);
+                const dataToSend = {
+                    id: Math.floor(Math.random() * 1000000) + 1,
+                    audioContent: arrayToSerialize,
+                };
+                const jsonData = JSON.stringify(dataToSend);
+
+                try {
+                    // Enviar o array para o servidor e obter a resposta como Blob
+                    const responseWav = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: jsonData,
+                    });
+
+                    if (!responseWav.ok) {
+                        throw new Error(`Erro ao baixar o arquivo WAV: ${responseWav.status} ${responseWav.statusText}`);
+                    }
+
+                    // Converter a resposta para Blob e retornar
+                    const wavBlob = await responseWav.blob();
+                    return wavBlob;
+
+                } catch (error) {
+                    console.error('Erro ao processar o array e baixar o arquivo WAV:', error);
+                    // Lançar a exceção novamente ou retornar uma estrutura de dados detalhada sobre o erro
+                    throw error;
+                }
+            };
+
+            socket.on('serverMessage', async (data) => {
+                const div = document.createElement('div');
+                const senderName = data.senderName;
+                if (senderName == username) {
+                    div.classList.add('chat-container', 'right');
+                } else {
+                    div.classList.add('chat-container', 'left');
+                }
+
+                const content = document.createElement('div');
+                content.classList.add('content');
+
+                try {
+                    let float32Array = new Float32Array(data.audioContent);
+                    let audioContent = decrypt(float32Array, seed);
+                    let wavBlob = await getWav(audioContent);
+
+                    let audioUrl = URL.createObjectURL(wavBlob);
+                    let audio = new Audio(audioUrl);
+                    audio.controls = true;
+                    audio.removeAttribute('preload');
+                    audio.id = 'audio-player';
+
+                    const senderNameDisplay = document.createElement('p');
+                    senderNameDisplay.classList.add('username-display');
+                    senderNameDisplay.textContent = `${senderName} (${ip})`;
+
+                    content.appendChild(audio);
+                    content.appendChild(senderNameDisplay);
+
+                    div.appendChild(content);
+
+                    // Adicione o novo chat-container à sua lista de mensagens
+                    messageList.appendChild(div);
+                } catch (error) {
+                    console.error('Erro ao processar a mensagem:', error);
+                    // Lidar com o erro conforme necessário
+                }
+            });
+
+            socket.on('connect', () => {
+                console.log('Connected to server');
+            });
+
+            socket.on('disconnect', () => {
+                console.log('Disconnected from server');
+            });
+
+            // Recuperar informações do localStorage no carregamento da página
+            const recordingState = localStorage.getItem('audioRecordingState');
+            const recordingId = localStorage.getItem('audioRecordingId');
+
+            if (recordingState === 'recording' && recordingId) {
+                // Verificar se a gravação estava ativa antes da atualização
+                const stream = new MediaStream();
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.id = recordingId; // Definir o identificador único
+
+                startRecording();
+            }
+
+            // Limpar o localStorage após recuperar as informações
+            localStorage.removeItem('audioRecordingState');
+            localStorage.removeItem('audioRecordingId');
+        });
+
+
+    </script>
+    <script src="{{ url_for('static', filename='assets/bootstrap/js/bootstrap.min.js') }}"></script>
+    <script src="https://unpkg.com/seedrandom@3.0.5/seedrandom.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>

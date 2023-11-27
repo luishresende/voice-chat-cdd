@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html data-bs-theme="light" lang="pr-br">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+    <title>Login</title>
+    <link rel="stylesheet" href="../static/assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Abril+Fatface&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Alfa+Slab+One&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Bebas+Neue&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Cantarell&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Ubuntu&amp;display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../static/assets/css/styles.min.css">
+    <link rel="shortcut icon" href="../static/assets/img/logo.png" type="img/png">
+</head>
+
+<body>
+    <main style="background: linear-gradient(#343541 28%, #8e8ea0 100%), #343541;">
+        <section id="login">
+            <div id="imagem"></div>
+            <div id="formulario">
+                <h1>Login</h1>
+                <p>Seja bem-vindo(a). Faça login para poder ter acesso ao chat de voz.</p>
+                <form id="login-form" method="post" autocomplete="on">
+                    <div class="campo" style="background: #343541;"><span class="material-icons">person</span><input
+                            id="username" autocomplete="email" maxlength="10" minlength="1" name="login"
+                            placeholder="usuário" required="" style="background: #acacbe;"><label class="form-label"
+                            for="ilogin">Login</label></div>
+                    <div class="campo" style="background: #343541;"><span class="material-icons">vpn_key</span><input
+                            type="password" id="password" autocomplete="current-password" maxlength="8" minlength="1"
+                            name="senha" placeholder="chave do grupo" required="" style="background: #acacbe;"><label
+                            class="form-label" for="isenha">Senha</label></div><input type="submit" value="Entrar"
+                        style="background: #343541;">
+                </form>
+            </div>
+        </section>
+    </main>
+    <script>
+        document.getElementById('login-form').addEventListener('submit', function (event) {
+          event.preventDefault(); // Prevent form submission
+    
+          const username = document.getElementById('username').value;
+          const password = document.getElementById('password').value;
+    
+          fetch('/set_username', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username: username, password: password })
+          })
+            .then(response => response.json())
+            .then(data => {
+              // Verificar se o servidor respondeu com sucesso
+              if (data.message === 'Username set successfully') {
+                // Redirecionar para a página de chat
+                window.location.href = '/chat';
+              } else {
+                // Caso contrário, você pode lidar com um erro ou exibir uma mensagem
+                alert('Erro ao definir o nome de usuário. Verifique a senha.');
+              }
+            })
+            .catch(error => {
+              console.error('Erro:', error);
+            });
+        });
+    </script>
+    <script src="../static/assets/js/script.min.js"></script>
+    <script src="../static/assets/bootstrap/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/seedrandom@3.0.5/seedrandom.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.1/dist/umd/popper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <script src="https://unpkg.com/wavesurfer.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+
+</html>
